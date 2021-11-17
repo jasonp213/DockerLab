@@ -5,12 +5,13 @@ services:
   db:
     image: mariadb
     environment:
-      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'      
+      # MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_ROOT_PASSWORD: 213123
       MYSQL_DATABASE: test
       MYSQL_USER: user
       MYSQL_PASSWORD: user
     healthcheck:
-      test: ["CMD", 'mysqladmin', 'ping']
+      test: bash -c 'mysqladmin ping -p"$$MYSQL_ROOT_PASSWORD"'
       interval: 5s
       retries: 5
       timeout: 3s
