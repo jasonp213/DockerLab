@@ -1,0 +1,31 @@
+version: "3"
+
+services:
+
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: user
+      POSTGRES_DB: user
+    # volumes:
+    #   - postgres-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "user"]
+      interval: 5s
+      retries: 5
+    restart: always
+  
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+        - 8080:8080
+    
+    depends_on:
+      db:
+        condition: service_healthy
+
+# volumes:
+#   postgres-db-volume:
+  
