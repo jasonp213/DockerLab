@@ -1,0 +1,31 @@
+version: "3"
+
+services:
+
+  db:
+    image: mariadb
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'      
+      MYSQL_DATABASE: test
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+    healthcheck:
+      test: ["CMD", 'mysqladmin', 'ping']
+      interval: 5s
+      retries: 5
+      timeout: 3s
+      start_period: 10s
+    restart: always
+  
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+        - 8080:8080
+    
+    depends_on:
+      db:
+        condition: service_healthy
+
+
+  
