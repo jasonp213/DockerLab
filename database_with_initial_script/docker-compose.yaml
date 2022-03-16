@@ -3,14 +3,16 @@ version: '3.6'
 services: 
     # MySQL
     db:
-        # MacOS M1 docker destop not suppose mysql now.
-        # image: mysql 
-        image: mariadb
-        command: --default-authentication-plugin=mysql_native_password
+        image: mysql:5.7
+        # MacOS M1 specific  platform
+        platform: linux/amd64
+        # command: --default-authentication-plugin=mysql_native_password
+        command: ["--collation-server=utf8_general_ci", "--character-set-server=utf8"]
         restart: always
         ports:
           - 3001:3306
         environment:
+            LANG: C.UTF-8  # if initial data has utf-8 data
             MYSQL_ROOT_PASSWORD: root
             MYSQL_DATABASE: mydb
             MYSQL_USER: user
@@ -18,9 +20,13 @@ services:
 
         volumes: 
             - ./init:/docker-entrypoint-initdb.d
+            - rdb_data:/var/lib/mysql
     
     adminer:
         image: adminer
         restart: always
         ports:
             - 8080:8080
+
+volumes:
+    rdb_data:
