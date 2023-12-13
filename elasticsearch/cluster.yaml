@@ -1,0 +1,82 @@
+version: "3.7"
+
+# https://github.com/compose-spec/compose-spec/blob/master/spec.md#extension
+# compose-file version >3.4
+x-es-common: &es-common
+  image: docker.elastic.co/elasticsearch/elasticsearch:7.17.14
+  # macOS silicon
+  # image: arm64v8/elasticsearch:7.17.14
+  restart: always
+  container_name: elastic
+  ulimits:
+    memlock:
+      soft: -1
+      hard: -1
+  networks:
+    - web_service
+
+
+services:
+
+  es01:
+    <<: *es-common
+    container_name: es01
+    environment:
+      - node.name=es01
+      - cluster.name=es-cluster
+      # 首次啟動時 會自動選出一個適合當master的節點,因此須設定適合當master的節點
+      - cluster.initial_master_nodes=es01
+      # 集群中的节点可以彼此发现并选举一个主节点,因此不能寫自己
+      - discovery.seed_hosts=es02,es03
+      # 不信任的ssl憑證
+      - xpack.security.enabled=false
+      # 用于设置 Elasticsearch (ES) 运行时 Java 虚拟机 (JVM) 参数的环境变量。
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    ports:
+      - 9200:9200
+    volumes:
+      - es01_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "localhost:9200"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+
+  es02:
+    <<: *es-common
+    container_name: es02
+    environment:
+      - node.name=es02
+      - cluster.name=es-cluster
+      - discovery.seed_hosts=es01,es03
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    volumes:
+      - es02_data:/usr/share/elasticsearch/data
+    depends_on:
+      es01:
+        condition: service_healthy
+
+  es03:
+    <<: *es-common
+    container_name: es03
+    environment:
+      - node.name=es03
+      - cluster.name=es-cluster
+      - discovery.seed_hosts=es01,es02
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    volumes:
+      - es03_data:/usr/share/elasticsearch/data
+    depends_on:
+      es01:
+        condition: service_healthy
+
+networks:
+  web_service:
+    external: true
+
+volumes:
+  es01_data:
+  es02_data:
+  es03_data:
