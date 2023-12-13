@@ -55,7 +55,7 @@ services:
     ports:
       - 9200:9200
     environment:
-      - ES_JAVA_OPTS="-Xms1g -Xmx1g"
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - ELASTIC_PASSWORD=password
       - bootstrap.memory_lock=true
       - xpack.security.enabled=true
