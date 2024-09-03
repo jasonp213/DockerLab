@@ -1,0 +1,9 @@
+FROM elasticsearch:7.16.3
+
+# plugin version need equal to ES
+RUN mkdir -p /usr/share/elasticsearch/plugins/ik && \
+    curl -sSL https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.16.3/elasticsearch-analysis-ik-7.16.3.zip \
+    -o /tmp/tmp.zip && \
+    unzip /tmp/tmp.zip \
+    -d /usr/share/elasticsearch/plugins/ik && \
+    rm /tmp/tmp.zip
